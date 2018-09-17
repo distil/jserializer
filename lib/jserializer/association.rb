@@ -1,57 +1,51 @@
 module Jserializer
   class Association
-    attr_reader :attribute_name, :relation_type, :serializer
+    attr_reader :relation_type, :serializer
     # Supported options:
     # :serializer, :embed, :embed_key
-    def initialize(attribute_name, relation_type, serializer:)
-      @attribute_name = attribute_name
+    def initialize(relation_type, serializer:)
       @relation_type = relation_type
       @serializer = serializer
     end
 
     def serialize(record)
-      return serialize_to_array(record) if relation_type == :has_many
-      return serialize_to_hash(record) if relation_type == :has_one
+      return nil if record.nil?
+      return [] if relation_type == :has_many && record.empty?
+      return serialize_collection(record) if relation_type == :has_many
+      return serialize_one(record) if relation_type == :has_one
       raise "Unable to serialize association type: #{relation_type}"
     end
 
     private
 
-    def serialize_to_array(record)
-      children = record.public_send(attribute_name)
-      return nil if children.nil?
-      return [] if children.empty?
-
-      klass = find_serializer_class(children.first)
-      unless klass || children.first.respond_to?(:as_json)
-        raise "Unable to find serializer for #{children.first.class.name}"
+    def serialize_collection(records)
+      klass = find_serializer_class(records.first)
+      unless klass || records.first.respond_to?(:as_json)
+        raise "Unable to find serializer for #{records.first.class.name}"
       end
 
       # initialize outside loop, so that we can reuse the serializer object
       serializer_object = klass.new(nil, root: false) if klass
-      children.map do |child|
+      records.map do |record|
         if serializer_object
-          serializer_object.reset(child)
+          serializer_object.reset(record)
           serializer_object.serializable_hash
         else
-          child.as_json(root: false)
+          record.as_json(root: false)
         end
       end
     end
 
-    def serialize_to_hash(record)
-      child = record.public_send(attribute_name)
-      return nil if child.nil?
-
-      klass = find_serializer_class(child)
-      unless klass || child.respond_to?(:as_json)
-        raise "Unable to find serializer for #{child.class.name}"
+    def serialize_one(record)
+      klass = find_serializer_class(record)
+      unless klass || record.respond_to?(:as_json)
+        raise "Unable to find serializer for #{record.class.name}"
       end
 
       if klass
-        klass.new(child, root: false).serializable_hash
+        klass.new(record, root: false).serializable_hash
       else
-        child.as_json(root: false)
+        record.as_json(root: false)
       end
     end
 

@@ -46,6 +46,15 @@ class AssociationTest < Minitest::Test
   class PostInheritedSerializer < PostSerializer
   end
 
+  class PostWithFilteredCommentsSerializer < Jserializer::Base
+    attributes :title, :content
+    has_many :comments, serializer: CommentSerializer
+
+    def comments
+      object.comments.take(1)
+    end
+  end
+
   class BlogAccountSerializer < Jserializer::Base
     attribute :id, key: :ext_id
     attribute :name, key: :username
@@ -75,6 +84,18 @@ class AssociationTest < Minitest::Test
         assert_equal([:id, :body, :who], comment.keys)
         assert_equal([i, "This is comment ##{i}", "User #{i}"], comment.values)
       end
+    end
+
+    it 'filters association by defining a method in the serializer' do
+      post = Post.new('A', 'AAA')
+      post.comments = (1..5).to_a.map do |i|
+        Comment.new(i, "This is comment ##{i}", "User #{i}")
+      end
+
+      serializer = PostWithFilteredCommentsSerializer.new(post)
+      result = serializer.serializable_hash
+      assert_equal([:title, :content, :comments], result.keys)
+      assert_equal(1, result[:comments].length)
     end
 
     it 'includes one-to-one associated model through has_one statement' do

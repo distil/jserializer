@@ -28,7 +28,7 @@ module Jserializer
 
       def associate(name, type, serializer: nil, key: nil)
         sklass = serializer.is_a?(String) ? serializer.constantize : serializer
-        association = Association.new(name, type, serializer: sklass)
+        association = Association.new(type, serializer: sklass)
         _attributes[name] = {
           association: association,
           key: key
@@ -86,10 +86,11 @@ module Jserializer
     end
 
     def _set_value(name, option)
-      return public_send(name) if respond_to?(name)
       if option.key?(:association)
-        return _build_from_association(option[:association])
+        return _build_from_association(name, option[:association])
       end
+
+      return public_send(name) if respond_to?(name)
 
       if ::Hash === object
         object.fetch(name)
@@ -98,8 +99,13 @@ module Jserializer
       end
     end
 
-    def _build_from_association(association)
-      association.serialize(object)
+    def _build_from_association(name, association)
+      resource = _fetch_associated_resource(name)
+      association.serialize(resource)
+    end
+
+    def _fetch_associated_resource(name)
+      respond_to?(name) ? public_send(name) : object.public_send(name)
     end
   end
 end
