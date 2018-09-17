@@ -68,6 +68,14 @@ module Jserializer
       options[:root] || self.class._root_key
     end
 
+    def to_json(*)
+      ::Oj.dump(serializable_hash)
+    end
+
+    def as_json(_options = {})
+      serializable_hash
+    end
+
     private
 
     def _include_attribute?(name)

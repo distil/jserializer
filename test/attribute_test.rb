@@ -113,5 +113,15 @@ class AttributeTest < Minitest::Test
       result = serializer.serializable_hash
       assert_equal([:name, :age, :gender], result.keys)
     end
+
+    it 'dumps to json' do
+      person = Person.new('Sam', 20, 'M')
+      serializer = PersonWithRootSerializer.new(person)
+      result = serializer.to_json
+      assert_equal(
+        '{":person":{":name":"Sam",":age":20,":gender":"M"}}',
+        result
+      )
+    end
   end
 end
