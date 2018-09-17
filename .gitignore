@@ -1,0 +1,19 @@
+/.bundle/
+/.yardoc
+/_yardoc/
+/coverage/
+/doc/
+/pkg/
+/spec/reports/
+/tmp/
+
+# Mac finder artifacts
+.DS_Store
+
+# RubyMine project files
+.idea
+
+# vim artifacts
+**.swp
+
+Gemfile.lock

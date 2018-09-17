@@ -1,0 +1,20 @@
+Style/StringLiterals:
+  Enabled: false
+
+Style/PercentLiteralDelimiters:
+  Enabled: false
+
+Style/UnneededPercentQ:
+  Enabled: false
+
+Style/Documentation:
+  Exclude:
+    - 'test/**/*'
+
+Style/SymbolArray:
+  Enabled: false
+
+Metrics/BlockLength:
+  Max: 25
+  Exclude:
+    - 'test/**/*'
