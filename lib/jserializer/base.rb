@@ -41,11 +41,12 @@ module Jserializer
       end
     end
 
-    attr_reader :object, :options
+    attr_reader :object, :options, :current_user
 
     def initialize(object, options = {})
       @object = object
       @options = options
+      @current_user = options[:current_user]
     end
 
     # reset object to reuse the serializer instance
