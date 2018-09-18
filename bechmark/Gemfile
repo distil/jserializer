@@ -1,0 +1,8 @@
+source 'https://rubygems.org'
+
+gem 'activemodel', '>= 3.0', '< 5'
+gem "active_model_serializers", "0.8.4"
+gem "fast_jsonapi"
+
+# use the latest code
+gem 'jserializer', path: '../'
