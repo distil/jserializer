@@ -10,7 +10,11 @@ module Jserializer
       end
 
       def attribute(name, key: nil)
-        self._attributes[name] = { key: key }
+        self._attributes[name] = {
+          key: key,
+          include_method: "include_#{name}?".to_sym
+        }
+        generate_attribute_methods(name)
       end
 
       def root(name)
@@ -28,11 +32,31 @@ module Jserializer
 
       def associate(name, type, serializer: nil, key: nil)
         sklass = serializer.is_a?(String) ? serializer.constantize : serializer
-        association = Association.new(type, serializer: sklass)
         _attributes[name] = {
-          association: association,
-          key: key
+          key: key,
+          include_method: "include_#{name}?".to_sym,
+          association: Association.new(type, serializer: sklass)
         }
+        generate_attribute_methods(name)
+      end
+
+      # Generate attribute access and inclusion check methods
+      # This improves performance by avoiding method lookups like:
+      #     public_send(name) if respond_to?(name)
+      def generate_attribute_methods(name)
+        class_eval <<-METHOD, __FILE__, __LINE__ + 1
+          def #{name}
+            if ::Hash === object
+              object.fetch(#{name})
+            else
+              object.#{name}
+            end
+          end
+
+          def include_#{name}?
+            true
+          end
+        METHOD
       end
 
       def inherited(subclass)
@@ -58,7 +82,7 @@ module Jserializer
     def serializable_hash
       result = {}
       self.class._attributes.each do |name, option|
-        next unless _include_attribute?(name)
+        next unless public_send(option[:include_method])
         result[option[:key] || name] = _set_value(name, option)
       end
       root_name ? { root_name => result } : result
@@ -79,33 +103,16 @@ module Jserializer
 
     private
 
-    def _include_attribute?(name)
-      include_method = "include_#{name}?".to_sym
-      return true unless respond_to?(include_method)
-      public_send(include_method)
-    end
-
     def _set_value(name, option)
       if option.key?(:association)
         return _build_from_association(name, option[:association])
       end
-
-      return public_send(name) if respond_to?(name)
-
-      if ::Hash === object
-        object.fetch(name)
-      else
-        object.public_send(name)
-      end
+      public_send(name)
     end
 
     def _build_from_association(name, association)
-      resource = _fetch_associated_resource(name)
+      resource = public_send(name)
       association.serialize(resource)
-    end
-
-    def _fetch_associated_resource(name)
-      respond_to?(name) ? public_send(name) : object.public_send(name)
     end
   end
 end
