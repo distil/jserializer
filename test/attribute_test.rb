@@ -91,20 +91,34 @@ class AttributeTest < Minitest::Test
       assert_includes(result.keys, :country)
     end
 
-    it 'nests under a root key' do
+    it 'nests under a root key when calling as_json method' do
       person = Person.new('Sam', 20, 'M')
       serializer = PersonWithRootSerializer.new(person)
-      result = serializer.serializable_hash
+      result = serializer.as_json
       assert_equal([:person], result.keys)
       assert_equal([:name, :age, :gender], result[:person].keys)
+    end
+
+    it 'disables root key by passing root option to as_json method' do
+      person = Person.new('Sam', 20, 'M')
+      serializer = PersonWithRootSerializer.new(person)
+      result = serializer.as_json(root: false)
+      assert_equal([:name, :age, :gender], result.keys)
     end
 
     it 'sets root key when initialize serializer' do
       person = Person.new('Sam', 20, 'M')
       serializer = PersonWithRootSerializer.new(person, root: :account)
-      result = serializer.serializable_hash
+      result = serializer.as_json
       assert_equal([:account], result.keys)
       assert_equal([:name, :age, :gender], result[:account].keys)
+    end
+
+    it 'should not include the root when calling serializable_hash method' do
+      person = Person.new('Sam', 20, 'M')
+      serializer = PersonWithRootSerializer.new(person, root: :account)
+      result = serializer.serializable_hash
+      assert_equal([:name, :age, :gender], result.keys)
     end
 
     it 'disables root key when initialize serializer' do

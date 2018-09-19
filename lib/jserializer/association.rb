@@ -25,7 +25,7 @@ module Jserializer
       end
 
       # initialize outside loop, so that we can reuse the serializer object
-      serializer_object = klass.new(nil, root: false) if klass
+      serializer_object = klass.new(nil) if klass
       records.map do |record|
         if serializer_object
           serializer_object.reset(record)
@@ -43,7 +43,7 @@ module Jserializer
       end
 
       if klass
-        klass.new(record, root: false).serializable_hash
+        klass.new(record).serializable_hash
       else
         record.as_json(root: false)
       end

@@ -46,10 +46,10 @@ module Jserializer
       def generate_attribute_methods(name)
         class_eval <<-METHOD, __FILE__, __LINE__ + 1
           def #{name}
-            if ::Hash === object
-              object.fetch(#{name})
+            if ::Hash === @object
+              @object.fetch(#{name})
             else
-              object.#{name}
+              @object.#{name}
             end
           end
 
@@ -79,26 +79,34 @@ module Jserializer
       @object = object
     end
 
+    # Returns a hash representation without the root
     def serializable_hash
-      result = {}
-      self.class._attributes.each do |name, option|
-        next unless public_send(option[:include_method])
-        result[option[:key] || name] = _set_value(name, option)
+      self.class._attributes.each_with_object({}) do |(name, option), hash|
+        if public_send(option[:include_method])
+          hash[option[:key] || name] = _set_value(name, option)
+        end
       end
-      root_name ? { root_name => result } : result
     end
 
     def root_name
-      return nil if options[:root] == false
-      options[:root] || self.class._root_key
+      return nil if @options[:root] == false
+      @options[:root] || self.class._root_key
     end
 
     def to_json(*)
-      ::Oj.dump(serializable_hash)
+      ::Oj.dump(as_json)
     end
 
-    def as_json(_options = {})
-      serializable_hash
+    # Returns a hash representation with the root
+    # Available options:
+    # :root => true or false
+    def as_json(options = {})
+      root = options.key?(:root) ? options[:root] : true
+      if root && root_name
+        { root_name => serializable_hash }
+      else
+        serializable_hash
+      end
     end
 
     private
