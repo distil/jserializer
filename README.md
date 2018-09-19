@@ -54,6 +54,47 @@ class PostSerializer < Jserializer::Base
 end
 ```
 
+### Root Key
+You can specify `root` key in class or when initializing a serializer instance:
+```ruby
+# Set root key in the Class definition
+class PostSerializer < Jserializer::Base
+  root: :article # if you don't state root, it will be included
+end
+
+# Set root key when initialize a new serializer object
+PostSerializer.new(post, root: :article)
+```
+
+You can disable root when initializing a serializer instance:
+```ruby
+PostSerializer.new(post, root: false)
+```
+
+Or when calling `as_json` method:
+```ruby
+PostSerializer.new(post).as_json(root: false)
+```
+
+You can get serialized hash with root key by calling `as_json` method:
+```ruby
+PostSerializer.new(post).as_json
+```
+
+However, you will not get root key when calling `serializable_hash`, even though you have specified a root key:
+```ruby
+PostSerializer.new(post).serializable_hash
+```
+
+### Meta
+You can include meta information when initializing a serializer instance
+```ruby
+PostSerializer.new(post, meta: { ... })
+
+# change meta key:
+PostSerializer.new(post, meta: { ... }, meta_key: :extra)
+```
+
 ## Compatibility & Migration
 
 Currently, not compatible if:
