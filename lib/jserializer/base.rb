@@ -93,6 +93,10 @@ module Jserializer
       @options[:root] || self.class._root_key
     end
 
+    def meta_key
+      @options[:meta_key] || :meta
+    end
+
     def to_json(*)
       ::Oj.dump(as_json)
     end
@@ -102,11 +106,13 @@ module Jserializer
     # :root => true or false
     def as_json(options = {})
       root = options.key?(:root) ? options[:root] : true
-      if root && root_name
-        { root_name => serializable_hash }
-      else
-        serializable_hash
-      end
+      hash = if root && root_name
+               { root_name => serializable_hash }
+             else
+               serializable_hash
+             end
+      hash[meta_key] = @options[:meta] if @options.key?(:meta)
+      hash
     end
 
     private

@@ -137,5 +137,24 @@ class AttributeTest < Minitest::Test
         result
       )
     end
+
+    it 'includes meta data' do
+      person = Person.new('Sam', 20, 'M')
+      serializer = PersonWithRootSerializer.new(person, meta: { score: 1 })
+      result = serializer.as_json
+      assert result.key?(:meta)
+      assert_equal({ score: 1 }, result[:meta])
+    end
+
+    it 'changes meta key by setting meta_key option' do
+      person = Person.new('Sam', 20, 'M')
+      serializer = PersonWithRootSerializer.new(
+        person, meta: { score: 1 }, meta_key: :extra
+      )
+      result = serializer.as_json
+      assert result.key?(:extra)
+      refute result.key?(:meta)
+      assert_equal({ score: 1 }, result[:extra])
+    end
   end
 end
