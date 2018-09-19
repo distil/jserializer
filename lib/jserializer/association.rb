@@ -1,11 +1,42 @@
 module Jserializer
   class Association
-    attr_reader :relation_type, :serializer
-    # Supported options:
-    # :serializer, :embed, :embed_key
-    def initialize(relation_type, serializer:)
+    attr_reader :relation_type, :serializer, :id_only
+
+    def initialize(name, relation_type, key:, serializer:, id_only:, embed_key:)
+      @attribute_name = name.to_s
       @relation_type = relation_type
+      @key = key
       @serializer = serializer
+      @id_only = id_only || false
+      @embed_key = embed_key || :id
+    end
+
+    def key
+      return @key if @key || !@id_only
+      case @relation_type
+      when :has_many
+        :"#{singularize_attribute_name}_ids"
+      when :has_one
+        :"#{@attribute_name}_id"
+      end
+    end
+
+    # The method name to access the data of the attribute
+    def access_name
+      return @attribute_name unless @id_only
+      # for simplicity without guessing
+      # the access method is post_ids for posts if associated with has_many
+      # and post.id for post if associated with has_one
+      # This also means for serializing a Hash object with has_one association
+      # It must provide access key like "post.id" to get data
+      case @relation_type
+      when :has_many
+        "#{singularize_attribute_name}_#{@embed_key}s"
+      when :has_one
+        "#{@attribute_name}.#{@embed_key}"
+      else
+        @attribute_name
+      end
     end
 
     def serialize(record)
@@ -53,6 +84,11 @@ module Jserializer
       return serializer if serializer
       return nil unless model.respond_to?(:active_model_serializer)
       model.active_model_serializer
+    end
+
+    def singularize_attribute_name
+      return @attribute_name unless @attribute_name.end_with?('s')
+      @attribute_name[0...-1]
     end
   end
 end

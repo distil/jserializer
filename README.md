@@ -54,6 +54,45 @@ class PostSerializer < Jserializer::Base
 end
 ```
 
+### Embed IDs
+You can include ids of associations by using `embed :ids`
+```ruby
+class BlogSerializer < Jserializer::Base
+  embed :ids
+  has_many :posts
+  has_one :account
+end
+```
+It will include `post_ids` and `account_id` in the result.
+
+You can turn objects back by using `embed: :objects`. The `embed` option can be added
+at top class level or inside `has_many` or `has_one`:
+```ruby
+class BlogSerializer < Jserializer::Base
+  embed :ids
+  has_many :posts
+  has_one :account, embed: :objects
+end
+```
+You can also use `embed_key` option to change the method to retrieve data
+```ruby
+class BlogSerializer < Jserializer::Base
+  has_many :posts, embed: :ids
+  has_one :account, embed: :ids, embed_key: :ext_id
+end
+```
+
+
+Jserializer uses the following ways to retrieve data:
+
+- For `has_many`, use method: `collection_singular_ids`.
+
+    e.g. `posts` will use `post_ids`
+
+- For `has_one`, use `association.id`.
+
+    e.g. `account` will use `account.id`
+
 ### Root Key
 You can specify `root` key in class or when initializing a serializer instance:
 ```ruby
