@@ -105,17 +105,18 @@ end
 PostSerializer.new(post, root: :article)
 ```
 
-You can disable root when initializing a serializer instance:
+You can enable/disable root when initializing a serializer instance:
 ```ruby
 PostSerializer.new(post, root: false)
 ```
 
 Or when calling `as_json` method:
 ```ruby
+# here root only accept boolean values, you cannot rename root at this point
 PostSerializer.new(post).as_json(root: false)
 ```
 
-You can get serialized hash with root key by calling `as_json` method:
+You can get serialized hash with root key and meta data by calling `as_json` method:
 ```ruby
 PostSerializer.new(post).as_json
 ```
@@ -133,6 +134,24 @@ PostSerializer.new(post, meta: { ... })
 # change meta key:
 PostSerializer.new(post, meta: { ... }, meta_key: :extra)
 ```
+
+### Collection
+The `active_serializer_model` gem includes the `ArraySerializer` class to handle collections. There are a lot of magics happening underneath when you pass a collection object into `render json: @xxx`, to allow `ArraySerializer` gets triggered automatically.
+
+Unlike `active_serializer_model`, there is no separate serializer base class for array. To serialize a collection, you need to set `is_collection: true` when initializing a new serializer
+```ruby
+serializer = PostSerializer.new(posts, is_collection: true)
+serializer.serializable_hash # or serializer.as_json to include root
+```
+
+You can also call `serializable_collection` method directly which will ignore the `is_collection` option
+```ruby
+serializer = PostSerializer.new(posts)
+serializer.serializable_collection
+```
+
+
+
 
 ## Compatibility & Migration
 
