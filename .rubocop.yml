@@ -26,3 +26,9 @@ Metrics/BlockLength:
   Max: 25
   Exclude:
     - 'test/**/*'
+
+Metrics/ParameterLists:
+  CountKeywordArgs: false
+
+Metrics/MethodLength:
+  Max: 15
