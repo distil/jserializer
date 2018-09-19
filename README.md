@@ -60,8 +60,8 @@ Currently, not compatible if:
 - have `include_xxx?` as private methods
 - override `attributes` in instance method
 - override internal method `_xxx` (e.g. `_serializable_array`)
-- cache
 - some options: `:except`
+- you expect serializer includes a root without explicitly specify it
 
 Since we try to reuse serializer instances to avoid unnecessary object creations, make sure there is no things like `||=` in
 the serializer class.
@@ -98,6 +98,13 @@ class ApplicationController < ActionController::Base
 end
 ```
 Then you can use this `render_json` method whenever you need to call `render json: resource ...` in your controllers.
+
+### Caching
+This gem does not plan to implement the cache feature.
+
+
+## Benchmark
+[See here](benchmark/README.md)
 
 ## Contributing
 
