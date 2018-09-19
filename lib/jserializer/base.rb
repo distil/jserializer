@@ -92,10 +92,17 @@ module Jserializer
 
     attr_reader :object, :options, :current_user
 
+    # supported options:
+    #   root:
+    #   meta:
+    #   meta_key:
+    #   current_user:
+    #   is_collection:
     def initialize(object, options = {})
       @object = object
-      @options = options
       @current_user = options[:current_user]
+      @is_collection = options.delete(:is_collection) || false
+      @options = options
     end
 
     # reset object to reuse the serializer instance
@@ -106,11 +113,24 @@ module Jserializer
 
     # Returns a hash representation without the root
     def serializable_hash
+      return serializable_collection if collection?
       self.class._attributes.each_with_object({}) do |(name, option), hash|
         if public_send(option[:include_method])
           hash[option[:key] || name] = _set_value(name, option)
         end
       end
+    end
+
+    def serializable_collection
+      serializer_object = self.class.new(nil, @options)
+      @object.map do |record|
+        serializer_object.reset(record)
+        serializer_object.serializable_hash
+      end
+    end
+
+    def collection?
+      @is_collection
     end
 
     def root_name

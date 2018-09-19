@@ -51,33 +51,24 @@ module Jserializer
 
     def serialize_collection(records)
       klass = find_serializer_class(records.first)
-      unless klass || records.first.respond_to?(:as_json)
+      return klass.new(records).serializable_collection if klass
+
+      unless records.first.respond_to?(:as_json)
         raise "Unable to find serializer for #{records.first.class.name}"
       end
 
-      # initialize outside loop, so that we can reuse the serializer object
-      serializer_object = klass.new(nil) if klass
-      records.map do |record|
-        if serializer_object
-          serializer_object.reset(record)
-          serializer_object.serializable_hash
-        else
-          record.as_json(root: false)
-        end
-      end
+      # loop through collection and serialize with as_json
+      records.map { |record| record.as_json(root: false) }
     end
 
     def serialize_one(record)
       klass = find_serializer_class(record)
-      unless klass || record.respond_to?(:as_json)
+      return klass.new(record).serializable_hash if klass
+
+      unless record.respond_to?(:as_json)
         raise "Unable to find serializer for #{record.class.name}"
       end
-
-      if klass
-        klass.new(record).serializable_hash
-      else
-        record.as_json(root: false)
-      end
+      record.as_json(root: false)
     end
 
     def find_serializer_class(model)
