@@ -146,7 +146,7 @@ module Jserializer
     end
 
     def to_json(*)
-      ::Oj.dump(as_json)
+      ::Oj.dump(as_json, mode: :compat)
     end
 
     # Returns a hash representation with the root

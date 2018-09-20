@@ -133,7 +133,7 @@ class AttributeTest < Minitest::Test
       serializer = PersonWithRootSerializer.new(person)
       result = serializer.to_json
       assert_equal(
-        '{":person":{":name":"Sam",":age":20,":gender":"M"}}',
+        '{"person":{"name":"Sam","age":20,"gender":"M"}}',
         result
       )
     end
