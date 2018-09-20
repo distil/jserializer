@@ -98,11 +98,14 @@ module Jserializer
     #   meta_key:
     #   current_user:
     #   is_collection:
+    #   only: []
+    #   except: []
     def initialize(object, options = {})
       @object = object
       @current_user = options[:current_user]
       @is_collection = options.delete(:is_collection) || false
       @options = options
+      _update_attributes_filter
     end
 
     # reset object to reuse the serializer instance
@@ -115,7 +118,7 @@ module Jserializer
     def serializable_hash
       return serializable_collection if collection?
       self.class._attributes.each_with_object({}) do |(name, option), hash|
-        if public_send(option[:include_method])
+        if _include_from_options?(name) && public_send(option[:include_method])
           hash[option[:key] || name] = _set_value(name, option)
         end
       end
@@ -162,6 +165,12 @@ module Jserializer
 
     private
 
+    def _include_from_options?(name)
+      return true unless @attributes_filter_list
+      return @filter_include_return if @attributes_filter_list.include?(name)
+      !@filter_include_return
+    end
+
     def _set_value(name, option)
       if option.key?(:association)
         return _build_from_association(name, option[:association])
@@ -173,6 +182,21 @@ module Jserializer
       resource = public_send(name)
       return resource if association.id_only
       association.serialize(resource)
+    end
+
+    # either only or except can be used to filter attributes
+    def _update_attributes_filter
+      if @options.key?(:only) && @options[:only].is_a?(Array)
+        @attributes_filter_list = @options[:only]
+        # if the attribute is included in :only, we will serialize it
+        @filter_include_return = true
+      elsif @options.key?(:except) && @options[:except].is_a?(Array)
+        @attributes_filter_list = @options[:except]
+        # if the attribute is included in :except, we will not serialize it
+        @filter_include_return = false
+      else
+        @attributes_filter_list = nil
+      end
     end
   end
 end
