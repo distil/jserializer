@@ -41,7 +41,7 @@ class AttributeTest < Minitest::Test
   end
 
   describe 'Attribute' do
-    it 'adds attributes through #attribute and #attributes methods' do
+    it 'adds attributes through #attribute or #attributes class methods' do
       person = Person.new('Sam', 20, 'M')
       serializer = PersonSerializer.new(person)
       result = serializer.serializable_hash
@@ -72,7 +72,7 @@ class AttributeTest < Minitest::Test
       assert_equal([:name, :age, :g, :country], result.keys)
     end
 
-    it 'overwrites value by the method with the name of the attribute' do
+    it 'overwrites value by the method with the same name of the attribute' do
       person = Person.new('Sam', 20, 'M', 'USA')
       serializer = PersonOverwriteSerializer.new(person)
       result = serializer.serializable_hash
@@ -136,25 +136,6 @@ class AttributeTest < Minitest::Test
         '{"person":{"name":"Sam","age":20,"gender":"M"}}',
         result
       )
-    end
-
-    it 'includes meta data' do
-      person = Person.new('Sam', 20, 'M')
-      serializer = PersonWithRootSerializer.new(person, meta: { score: 1 })
-      result = serializer.as_json
-      assert result.key?(:meta)
-      assert_equal({ score: 1 }, result[:meta])
-    end
-
-    it 'changes meta key by setting meta_key option' do
-      person = Person.new('Sam', 20, 'M')
-      serializer = PersonWithRootSerializer.new(
-        person, meta: { score: 1 }, meta_key: :extra
-      )
-      result = serializer.as_json
-      assert result.key?(:extra)
-      refute result.key?(:meta)
-      assert_equal({ score: 1 }, result[:extra])
     end
   end
 end
