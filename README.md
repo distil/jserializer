@@ -111,6 +111,7 @@ end
 ```
 
 For associations, Jserializer uses the following ways to retrieve data:
+
 Type | Method | Example |
 ------------ | ------------- | -------------
 |  has_many | `collection_singular_ids`  | `posts` => `post_ids`|
