@@ -92,6 +92,8 @@ module Jserializer
 
     attr_reader :object, :options, :current_user
 
+    alias :scope :current_user
+
     # supported options:
     #   root:
     #   meta:
@@ -102,7 +104,7 @@ module Jserializer
     #   except: []
     def initialize(object, options = {})
       @object = object
-      @current_user = options[:current_user]
+      @current_user = options[:current_user] || options[:scope]
       @is_collection = options.delete(:is_collection) || false
       @options = options
       _update_attributes_filter
