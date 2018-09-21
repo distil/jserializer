@@ -93,8 +93,8 @@ You will get:
 }
 ```
 
-### Bring Your Own JSON Decoder
-Our `to_json` method uses standard JSON module to generate JSON string. There are many JSON decoding backend there, and they offer different customization options. Besides, you can use MultiJson to switch to different backend.
+### Bring Your Own JSON Encoder
+Our `to_json` method uses standard JSON module to generate JSON string. There are many JSON encode backend there, and they offer different customization options. Besides, you can use MultiJson to switch between different backends.
 
 You are welcome to bring your own solution here. To do that, simply override the `to_json` method
 ```ruby
@@ -107,7 +107,7 @@ class ApplicationSerializer < Jserializer::Base
   end
 end
 ```
-Then the rest of your serializers can inherit from `ApplicationSerializer` and start to use your preferred decoder.
+Then the rest of your serializers can inherit from `ApplicationSerializer` and start to use your preferred encoder.
 
 
 ## Serializer Class Definition Options
