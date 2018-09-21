@@ -235,15 +235,24 @@ This gem does not provide such feature, but you can easily achieve it in applica
 class ApplicationController < ActionController::Base
   # ... ...
   def render_json(resource, options = {})
-    serializer = options.delete(:serializer)
-    serializer ||= resource.respond_to?(:active_model_serializer) && resource.active_model_serializer
-    if serializer
-      options[:current_user] = current_user
-      # ... ...
-      render json: serializer.new(resource, options), options
-    else
-      render json: resource, options
+    if options.key?(:serializer)
+      serializer = options.delete(:serializer)
+    elsif options.key?(:each_serializer)
+      serializer = options.delete(:each_serializer)
+      options[:is_collection] = true
     end
+
+    if !serializer && resource.respond_to?(:active_model_serializer)
+      serializer = resource.active_model_serializer
+    end
+
+    if serializer
+      options[:scope] = current_user
+      options[:json] = serializer.new(resource, options)
+    else
+      options[:json] = resource
+    end
+    render options
   end
 end
 ```
