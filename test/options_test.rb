@@ -44,23 +44,30 @@ class OptionsTest < Minitest::Test
     end
 
     describe 'Scope' do
-      it 'sets current_user through option[:current_user]' do
+      it 'sets scope through option[:scope]' do
+        user = User.new(123, 'Sam', 'abc', 'top_secret', false)
+        account = Account.new(1, 'New Account', 85)
+        serializer = AccountSerializer.new(account, scope: user)
+        result = serializer.serializable_hash
+        assert_equal(user, serializer.scope)
+        assert_equal([:id, :company], result.keys)
+      end
+
+      it 'sets scope through option[:current_user]' do
         user = User.new(123, 'Sam', 'abc', 'top_secret', false)
         account = Account.new(1, 'New Account', 85)
         serializer = AccountSerializer.new(account, current_user: user)
         result = serializer.serializable_hash
-        assert_equal(user, serializer.current_user)
+        assert_equal(user, serializer.scope)
         assert_equal([:id, :company], result.keys)
       end
 
       it 'alias scope with current_user' do
         user = User.new(123, 'Sam', 'abc', 'top_secret', false)
         account = Account.new(1, 'New Account', 85)
-        serializer = AccountSerializer.new(account, scope: user)
-        result = serializer.serializable_hash
+        serializer = AccountSerializer.new(account, current_user: user)
         assert_equal(user, serializer.current_user)
         assert_equal(user, serializer.scope)
-        assert_equal([:id, :company], result.keys)
       end
     end
 
