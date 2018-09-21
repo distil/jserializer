@@ -1,4 +1,10 @@
 version: "2"
+plugins:
+  rubocop:
+    enabled: true
+    channel: rubocop-0-58
+  bundler-audit:
+    enabled: true
 exclude_patterns:
 - "benchmark/"
 - "jserializer.gemspec"
