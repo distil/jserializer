@@ -1,5 +1,8 @@
 # JSerializer
 
+[![Build Status](https://travis-ci.org/distil/jserializer.svg)](https://travis-ci.org/distil/jserializer)
+[![Code Climate](https://codeclimate.com/github/distil/jserializer.svg)](https://codeclimate.com/github/distil/jserializer)
+
 JSerializer is a JSON Serializer for Ruby objects. It is designed to be a drop-in replacement of Active Model Serializer (target version: [0.8](https://github.com/rails-api/active_model_serializers/tree/0-8-stable)) with [better performance](benchmark/README.md).
 
 JSerializer does not rely on Rails or Active Model or Active Support, which makes it easier to be integrated into general Ruby projects.
