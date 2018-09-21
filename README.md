@@ -2,7 +2,7 @@
 
 JSerializer is a JSON Serializer for Ruby objects. It is designed to be a drop-in replacement of Active Model Serializer (target version: [0.8](https://github.com/rails-api/active_model_serializers/tree/0-8-stable)) with [better performance](benchmark/README.md).
 
-JSerializer does not rely on Rails or Active Model, and only requires few dependencies which makes it easier to be used in general Ruby project.
+JSerializer does not rely on Rails or Active Model or Active Support, which makes it easier to be integrated into general Ruby projects.
 
 ## Installation
 
@@ -53,7 +53,12 @@ end
 person = Person.new(1, 'John', 'Doe', 16, 'm', 'US')
 serializer = PersonSerializer.new(person)
 
-# generates a Hash => {:user=>{:full_name=>"John Doe", :gender=>"Male", :country_code=>"US"}}
+# generates a Hash without root key
+# => {:full_name=>"John Doe", :gender=>"Male", :country_code=>"US"}
+serializer.serializable_hash
+
+# generates a Hash with root key
+# => {:user=>{:full_name=>"John Doe", :gender=>"Male", :country_code=>"US"}}
 serializer.as_json
 
 # generates JSON => {"user":{"full_name":"John Doe","gender":"Male","country_code":"US"}}
@@ -84,6 +89,22 @@ You will get:
   ]
 }
 ```
+
+### Bring Your Own JSON Decoder
+Our `to_json` method uses standard JSON module to generate JSON string. There are many JSON decoding backend there, and they offer different customization options. Besides, you can use MultiJson to switch to different backend.
+
+You are welcome to bring your own solution here. To do that, simply override the `to_json` method
+```ruby
+class ApplicationSerializer < Jserializer::Base
+  def to_json(*)
+    # use ActiveSupport in Rails as a delegator
+    ActiveSupport::JSON.encode(as_json)
+    # use oj:
+    # Oj.dump(as_json, mode: :compat, use_to_json: true)
+  end
+end
+```
+Then the rest of your serializers can inherit from `ApplicationSerializer` and start to use your preferred decoder.
 
 
 ## Serializer Class Definition Options
