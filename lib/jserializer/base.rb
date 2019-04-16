@@ -72,7 +72,7 @@ module Jserializer
         class_eval <<-METHOD, __FILE__, __LINE__ + 1
           def #{name}
             if ::Hash === @object
-              @object.fetch(#{access_name})
+              @object.fetch(:'#{access_name}')
             else
               @object.#{access_name}
             end
