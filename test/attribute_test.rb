@@ -137,5 +137,12 @@ class AttributeTest < Minitest::Test
         result
       )
     end
+
+    it 'serialize Hash object' do
+      person = { name: 'Sam', age: 20, gender: 'M' }
+      serializer = PersonSerializer.new(person)
+      result = serializer.serializable_hash
+      assert_equal(person, result)
+    end
   end
 end
